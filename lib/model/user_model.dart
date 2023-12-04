@@ -12,6 +12,7 @@ class UserModel {
     required this.gender,
     required this.image,
   });
+  // using for insert data
   Map<String, dynamic> fromJson() {
     return {
       'id': id,
@@ -22,6 +23,7 @@ class UserModel {
     };
   }
 
+  // using for get data
   UserModel.toJson(Map<String, dynamic> res)
       : id = res['id'],
         name = res['name'],

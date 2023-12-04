@@ -1,9 +1,22 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:local_storage/controller/user_controller.dart';
+import 'package:local_storage/model/user_model.dart';
 
 import '../widget/input_field.dart';
+import 'home_screen.dart';
 
-class AddScreen extends StatelessWidget {
-  AddScreen({super.key});
+class AddScreen extends StatefulWidget {
+  const AddScreen({super.key});
+
+  @override
+  State<AddScreen> createState() => _AddScreenState();
+}
+
+class _AddScreenState extends State<AddScreen> {
   var fullname = TextEditingController();
   var gender = TextEditingController();
   var age = TextEditingController();
@@ -15,7 +28,9 @@ class AddScreen extends StatelessWidget {
         title: const Text('Enter information'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              openGallery();
+            },
             icon: const Icon(Icons.photo),
           ),
           IconButton(
@@ -36,7 +51,14 @@ class AddScreen extends StatelessWidget {
                   height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(150),
-                    color: Colors.amber,
+                    image: (_file == null)
+                        ? const DecorationImage(
+                            image: AssetImage('asset/icon/profile.png'),
+                          )
+                        : DecorationImage(
+                            fit: BoxFit.cover,
+                            image: FileImage(_file!),
+                          ),
                   ),
                 ),
               ],
@@ -66,9 +88,42 @@ class AddScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          await UserController()
+              .insertData(
+                UserModel(
+                  id: Random().nextInt(10000),
+                  name: fullname.text,
+                  age: int.parse(age.text),
+                  gender: gender.text,
+                  image: _file!.path,
+                ),
+              )
+              .whenComplete(
+                () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                    (route) => false),
+              );
+        },
         child: const Text('Save'),
       ),
     );
+  }
+
+  File? _file;
+  Future openGallery() async {
+    try {
+      final fileChoose =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (fileChoose == null) return;
+      setState(() {
+        _file = File(fileChoose.path);
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }
