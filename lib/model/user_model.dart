@@ -12,7 +12,7 @@ class UserModel {
     required this.gender,
     required this.image,
   });
-  // using for insert data
+  // using for insert & update data
   Map<String, dynamic> fromJson() {
     return {
       'id': id,
